@@ -1,0 +1,122 @@
+{
+  "kirinos.permission.CAMERA": {
+    "name": "Access your camera",
+    "description": "This application will be able to record video from your camera while it is running."
+  },
+  "kirinos.permission.MICROPHONE": {
+    "name": "Access your microphone",
+    "description": "This application will be able to record audio from your microphone will it is running."
+  },
+  "kirinos.permission.SEND_NOTIFICATIONS": {
+    "name": "Send and display notifications",
+    "description": "This application will be able to display notifications and run in the background."
+  },
+  "kirinos.permission.NETWORK_INTERNET": {
+    "name": "Access the internet and your local network",
+    "description": "This application will be able to connect to the internet and devices in your network."
+  },
+  "kirinos.permission.NETWORK_SERVER": {
+    "name": "Accept incoming connections from other devices",
+    "description": "This application will be able to act as a server and listen for connections from devices."
+  },
+  "kirinos.permission.SCREEN_CONFIG": {
+    "name": "Access the system graphics configuration",
+    "description": "This application will be able to access information about your graphics and displays."
+  },
+  "kirinos.permission.SIMULATE_INPUT": {
+    "name": "Control input devices",
+    "description": "This application will be able to act as if it was an input device."
+  },
+  "kirinos.permission.USER_SESSION": {
+    "name": "Manage your user account",
+    "description": "This application will be able to manage your session and user information."
+  },
+  "kirinos.permission.DISKS_RO": {
+    "name": "Access the system storage configuration",
+    "description": "This application will be able to access information about the device's disks."
+  },
+  "kirinos.permission.DISKS_RW": {
+    "name": "Change the system storage configuration",
+    "description": "This application will be able to repartition, erase and restore your disks."
+  },
+  "kirinos.permission.STARTUP": {
+    "name": "Run when you log in",
+    "description": "This application will be able to open as soon as you log into this account."
+  },
+  "kirinos.permission.START_DOWNLOADS": {
+    "name": "Download files to your device",
+    "description": "This application will be able to start downloads into your downloads folder."
+  },
+  "kirinos.permission.MANAGE_DOWNLOADS": {
+    "name": "Manage running downloads",
+    "description": "This application will be able to access information about all downloads made."
+  },
+  "kirinos.permission.FILES_DOCUMENTS_RO": {
+    "name": "Read your documents",
+    "description": "This application will be able to read all files in your documents folder."
+  },
+  "kirinos.permission.FILES_MUSIC_RO": {
+    "name": "Read your music",
+    "description": "This application will be able to read all files in your music folder."
+  },
+  "kirinos.permission.FILES_PICTURES_RO": {
+    "name": "Read your pictures",
+    "description": "This application will be able to read all files in your pictures folder."
+  },
+  "kirinos.permission.FILES_VIDEOS_RO": {
+    "name": "Read your videos",
+    "description": "This application will be able to read all files in your videos folder."
+  },
+  "kirinos.permission.FILES_DOWNLOADS_RO": {
+    "name": "Read your downloaded files",
+    "description": "This application will be able to read all files in your downloads folder."
+  },
+  "kirinos.permission.FILES_DOCUMENTS_RW": {
+    "name": "Change your documents",
+    "description": "This application will be able to modify all files in your documents folder."
+  },
+  "kirinos.permission.FILES_MUSIC_RW": {
+    "name": "Change your music",
+    "description": "This application will be able to modify all files in your music folder."
+  },
+  "kirinos.permission.FILES_PICTURES_RW": {
+    "name": "Change your pictures",
+    "description": "This application will be able to modify all files in your pictures folder."
+  },
+  "kirinos.permission.FILES_VIDEOS_RW": {
+    "name": "Change your videos",
+    "description": "This application will be able to modify all files in your videos folder."
+  },
+  "kirinos.permission.FILES_DOWNLOADS_RW": {
+    "name": "Change your downloaded files",
+    "description": "This application will be able to modify all files in your downloads folder."
+  },
+  "kirinos.permission.FILES_ALL": {
+    "name": "Fully access all of your files",
+    "description": "This application will be able to modify all files in your account."
+  },
+  "kirinos.permission.SYSTEM_SETTINGS_RO": {
+    "name": "Read secure system settings",
+    "description": "This application will be able to read advanced system settings."
+  },
+  "kirinos.permission.SYSTEM_SETTINGS_RW": {
+    "name": "Change secure system settings",
+    "description": "This application will be able to modify advanced system settings."
+  },
+  "kirinos.permission.AUTOMATION": {
+    "name": "Control other applications on the system",
+    "description": "This application will be able to control other applications like it was you."
+  },
+  "kirinos.permission.MANAGE_APPLICATIONS": {
+    "name": "Manage applications running on the system",
+    "description": "This application will be able to open and close other applications on the system."
+  },
+  "kirinos.permission.APPLICATION_STORE": {
+    "name": "Install, update and uninstall applications",
+    "description": "This application will be able to install, modify and uninstall non-system applications."
+  },
+  "kirinos.permission.SYSTEM_INFORMATION": {
+    "name": "Read system information",
+    "description": "This application will be able to access real-time system information about your hardware."
+  }
+}

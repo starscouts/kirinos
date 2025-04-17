@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../warning.js"></script>
+    <title>kirinos-startup</title>
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+            pointer-events: none;
+            user-select: none;
+            user-focus: none;
+            cursor: none;
+            outline: none;
+        }
+
+        #bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-color: #90a14a;
+            background-size: cover;
+            background-position: center;
+        }
+
+        html, body {
+            background-color: #90a14a;
+            color: black;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="bg"></div>
+    <div style="display: flex; align-items: center; justify-content: center; position: fixed; inset: 0;">
+        <div style="background: rgba(255, 255, 255, .75); backdrop-filter: blur(20px); padding: 50px; width: 512px; height: 256px; border-radius: 10px;">
+            <div style="height: calc(100% - 48px + 50px); display: flex; align-items: center; justify-content: center;">
+                <div>
+                    <img src="../../logo.svg" style="width: 96px; display: block; margin-left: auto; margin-right: auto;">
+                    <h2 style="text-align: center;">Welcome to kirinOS</h2>
+                </div>
+            </div>
+            <div style="background: rgba(0, 0, 0, .1); height: 48px; margin: 0 -50px -50px;border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; border-top: 1px solid rgba(0, 0, 0, .1);">
+                <div style="display: flex; align-items: center; height: 100%; padding: 0 10px;">
+                    <img src="loader.svg" style="width: 42px; opacity: .5;">
+                    <span id="loading-message">Hold down Shift to disable loading system extensions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const steps = [
+            {
+                title: "Loading kernel extensions...",
+                command: "systemctl start kmod.service"
+            },
+            {
+                title: "Applying kernel variables...",
+                command: "systemctl start systemd-sysctl.service"
+            },
+            {
+                title: "Starting scheduled jobs manager...",
+                command: "systemctl start cron.service"
+            },
+            {
+                title: "Starting desktop manager...",
+                command: "systemctl start dbus.service"
+            },
+            {
+                title: "Starting OpenSSH server...",
+                command: "systemctl start ssh.service"
+            },
+            {
+                title: "Starting NTP client...",
+                command: "systemctl start systemd-timesyncd.service"
+            },
+            {
+                title: "Starting device manager...",
+                command: "systemctl start systemd-udevd.service"
+            },
+            {
+                title: "Initialising network core...",
+                command: "systemctl start networking.service"
+            },
+            {
+                title: "Initialising network frontend...",
+                command: "systemctl start NetworkManager.service"
+            },
+            {
+                title: "Initialising WLAN manager...",
+                command: "systemctl start wpa_supplicant.service"
+            },
+            {
+                title: "Starting UNIX policy manager...",
+                command: "systemctl start polkit.service"
+            },
+            {
+                title: "Starting audio subsystem...",
+                command: "systemctl start koaudio.service"
+            },
+            {
+                title: "Configuring encryption...",
+                command: "modprobe ecryptfs && /kirin/core/startup/encryption.sh"
+            }
+        ];
+
+        const cp = require('child_process');
+
+        function sleep(ms) {
+            return new Promise((res) => {
+                setTimeout(res, ms);
+            });
+        }
+
+        function exec(cmd) {
+            return new Promise((res, rej) => {
+                let p = cp.exec(cmd);
+
+                p.on('close', (code, signal) => {
+                    if (!code || code === 0) {
+                        res(code, signal);
+                    } else {
+                        rej(code, signal);
+                    }
+                })
+            });
+        }
+
+        setTimeout(() => {
+            document.getElementById("loading-message").innerText = "Setting wallpaper...";
+            document.getElementById("bg").style.backgroundImage = 'url("../../wallpaper.jpg")';
+
+            setTimeout(async () => {
+                for (let step of steps) {
+                    document.getElementById("loading-message").innerText = step.title;
+                    await sleep(100);
+
+                    try {
+                        await exec(step.command);
+                        await sleep(100);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                document.getElementById("loading-message").innerText = "Initialising login screen...";
+                document.body.style.opacity = "0";
+                document.body.style.pointerEvents = "none";
+                location.href = "../login/index.html";
+            }, 1000)
+        }, 3000);
+    </script>
+</body>
+</html>

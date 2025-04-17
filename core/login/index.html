@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../warning.js"></script>
+    <title>kirinos-login</title>
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+            user-select: none;
+            -webkit-user-drag: none;
+            outline: none;
+        }
+
+        html, body {
+            background-color: #90a14a;
+            color: black;
+            margin: 0;
+        }
+
+        #bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-color: #90a14a;
+            background-image: url("../../wallpaper.jpg");
+            background-size: cover;
+            background-position: center;
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, .25);
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, .35);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: rgba(0, 0, 0, .5);
+        }
+
+        .user-card-avatar {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 64px;
+            height: 64px;
+            border-radius: 999px;
+        }
+
+        #login-card-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 999px;
+        }
+
+        .login-card {
+            display: grid;
+            grid-template-columns: max-content max-content;
+            width: 256px;
+            grid-gap: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .user-card-name {
+            display: block;
+            width: max-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #users {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            margin: 20px 50px 0;
+        }
+
+        .user-card:hover, .login-action:hover {
+            background: rgba(0, 0, 0, .05);
+        }
+
+        .user-card {
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .user-card:active, .login-action:active {
+            background: rgba(0, 0, 0, .075);
+        }
+
+        .login-action {
+            border-radius: 5px;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #login-card-password {
+            width: 182px;
+            border: 0;
+            height: 24px;
+            padding: 5px 20px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, .025);
+        }
+
+        #login-card-password.shake {
+            animation-name: shake;
+            animation-iteration-count: 6;
+            animation-timing-function: linear;
+            animation-duration: .1s;
+            animation-fill-mode: both;
+        }
+
+        @keyframes shake {
+            33% {
+                margin-left: -10px;
+            }
+            66% {
+                margin-right: -10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg"></div>
+    <div id="content" style="display: flex; align-items: center; justify-content: center; position: fixed; inset: 0;">
+        <div style="background: rgba(255, 255, 255, .75); backdrop-filter: blur(20px); padding: 50px; width: 512px; height: 256px; border-radius: 10px;">
+            <div style="background: rgba(0, 0, 0, .1); margin: -50px -50px 0; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom: 1px solid rgba(0, 0, 0, .1); height: 80px;">
+                <div style="display: inline-flex; align-items: center;margin: 0 10px; height: 100%; width: max-content;">
+                    <img src="../../logo.svg" style="width: 64px;">
+                    <h2 style="margin-left: 5px;" id="clock">--:--</h2>
+                    <script>
+                        document.getElementById("clock").innerText = (new Intl.DateTimeFormat('en-IE', {
+                            hour: 'numeric',
+                            minute: '2-digit'
+                        })).format(new Date());
+
+                        setInterval(() => {
+                            document.getElementById("clock").innerText = (new Intl.DateTimeFormat('en-IE', {
+                                hour: 'numeric',
+                                minute: '2-digit'
+                            })).format(new Date());
+                        }, 1000);
+                    </script>
+                </div>
+                <div style="float: right; display: flex; align-items: center; height: 100%; margin: 0 25px;" id="power-actions">
+                    <a class="login-action" onclick="shutdown();">
+                        <img src="shutdown.svg" style="width: 24px;">
+                    </a>
+                    <a class="login-action" onclick="restart();">
+                        <img src="restart.svg" style="width: 24px;">
+                    </a>
+                    <a class="login-action" onclick="sleep();">
+                        <img src="sleep.svg" style="width: 24px;">
+                    </a>
+                </div>
+            </div>
+            <div style="height: calc(100% + 19px); margin: 0 -50px -50px;overflow-y: scroll;">
+                <div id="users"></div>
+                <div id="login" style="display: none; padding: 10px; height: calc(100% - 20px);">
+                    <a id="login-back" class="login-action" onclick="cancelLogin();">
+                        <img src="back.svg" style="width: 24px;">
+                    </a>
+
+                    <div class="login-card" style="height: calc(100% - 64px);">
+                        <div style="display: flex; align-items: center;">
+                            <img src="" alt="" id="login-card-avatar">
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div>
+                                <h3 id="login-card-name" style="margin: 0 0 5px;"></h3>
+                                <input type="password" id="login-card-password" placeholder="Enter password">
+                                <img src="../startup/loader.svg" style="height: 30px; display: none;" id="login-card-loader">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        for (let user of require('fs').readdirSync("/kirin/users")) {
+            document.getElementById("users").innerHTML += `<a onclick="loginAs('${user}')">
+                <div class="user-card">
+                    <img src="${require('fs').existsSync("/kirin/users/" + user + "/avatar") ? "file:///kirin/users/" + user + "/avatar" : "../../defaultuser.svg"}" alt="" class="user-card-avatar">
+                    <span class="user-card-name">${require('fs').existsSync("/kirin/users/" + user + "/name") ? require('fs').readFileSync("/kirin/users/" + user + "/name").toString().trim() : user}</span>
+                </div>
+            </a>`;
+        }
+
+        function sleep() {
+            require('child_process').execSync("systemctl suspend");
+        }
+
+        function shutdown() {
+            document.body.style.opacity = "0";
+            document.body.style.pointerEvents = "none";
+            require('child_process').execSync("poweroff");
+        }
+
+        function restart() {
+            document.body.style.opacity = "0";
+            document.body.style.pointerEvents = "none";
+            require('child_process').execSync("reboot");
+        }
+
+        window.onload = () => {
+            document.getElementById("content").style.opacity = "";
+            document.getElementById("content").style.pointerEvents = "";
+        }
+
+        window.currentUser = null;
+
+        function loginAs(id) {
+            window.currentUser = id;
+
+            document.getElementById("login-card-avatar").src = require('fs').existsSync("/kirin/users/" + id + "/avatar") ? "file:///kirin/users/" + id + "/avatar" : "../../defaultuser.svg";
+            document.getElementById("login-card-name").innerText = require('fs').existsSync("/kirin/users/" + id + "/name") ? require('fs').readFileSync("/kirin/users/" + id + "/name").toString().trim() : id;
+            document.getElementById("login-card-password").innerText = "";
+
+            document.getElementById("users").style.display = "none";
+            document.getElementById("login").style.display = "";
+            document.getElementById("login-card-password").focus();
+        }
+
+        document.getElementById("login-card-password").onkeydown = (e) => {
+            if (e.code === "Enter" && document.getElementById("login-card-password").value.length > 0 && document.getElementById("login-card-password").value.length < 64) {
+                confirmLogin();
+            }
+        }
+
+        function confirmLogin() {
+            document.getElementById("login-card-password").classList.remove("shake");
+            document.getElementById("login-back").style.opacity = "0";
+            document.getElementById("login-back").style.pointerEvents = "none";
+            document.getElementById("login-card-password").style.display = "none";
+            document.getElementById("login-card-loader").style.display = "";
+            document.getElementById("power-actions").style.opacity = ".5";
+            document.getElementById("power-actions").style.pointerEvents = "none";
+            document.body.style.cursor = "none";
+
+            let p = require('child_process').execFile("./decrypt.sh", [ window.currentUser, document.getElementById("login-card-password").value.replaceAll('"', "\\\"") ], { stdio: "pipe", shell: true, cwd: "/kirin/core/login" });
+
+            p.stdout.on('data', (data) => {
+                console.info(data.toString());
+            });
+
+            p.stderr.on('data', (data) => {
+                console.error(data.toString());
+            });
+
+            p.on('close', (code, signal) => {
+                console.log(code, signal);
+
+                if (code === 0) {
+                    try { require('child_process').execSync("rm -rf /kirin/session"); } catch (e) {}
+                    require('child_process').execSync("ln -s /kirin/users/" + currentUser + "/home /kirin/session");
+
+                    document.body.style.opacity = "0";
+                    document.body.style.pointerEvents = "none";
+                    location.href = "../desktop/index.html";
+                } else {
+                    document.getElementById("login-back").style.opacity = "1";
+                    document.getElementById("login-back").style.pointerEvents = "";
+                    document.getElementById("login-card-password").style.display = "";
+                    document.getElementById("login-card-password").value = "";
+                    document.getElementById("login-card-loader").style.display = "none";
+                    document.getElementById("power-actions").style.opacity = "1";
+                    document.getElementById("power-actions").style.pointerEvents = "";
+                    document.getElementById("login-card-password").focus();
+                    document.getElementById("login-card-password").classList.add("shake");
+                    document.body.style.cursor = "";
+                }
+            })
+        }
+
+        function cancelLogin() {
+            window.currentUser = null;
+            document.getElementById("login-card-password").classList.remove("shake");
+            document.getElementById("users").style.display = "";
+            document.getElementById("login").style.display = "none";
+        }
+    </script>
+</body>
+</html>

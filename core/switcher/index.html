@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>window.require = window.parent.require;</script>
+    <meta charset="UTF-8">
+    <title>kirinos-switcher</title>
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+            user-select: none;
+            user-focus: none;
+            outline: none;
+            overflow: hidden;
+        }
+
+        html, body {
+            background-color: transparent;
+            color: black;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        window.addEventListener('error', (event, source, lineno, colno, error) => {
+            parent.transferError([
+                event, source, lineno, colno, error
+            ]);
+
+            return false;
+        });
+
+        window.addEventListener('keyup', (event) => {
+            console.log(event);
+
+            if (event.key === "Alt" || !event.altKey) {
+                window.parent.document.getElementById("switcher-outer").style.display = "none";
+                window.parent.document.getElementById("switcher").blur();
+
+                window.parent.wm.focusWindow(window.items[window.focusedItem]['id']);
+            } else if (event.key === "Tab" && event.altKey) {
+                tabPress();
+            } else if (event.altKey) {
+                window.parent.document.getElementById("switcher-outer").style.display = "none";
+                window.parent.document.getElementById("switcher").blur();
+            }
+        });
+
+        function tabPress() {
+            window.focusedItem++;
+            if (window.focusedItem >= window.items.length) window.focusedItem = 0;
+            refreshItems(window.focusedItem);
+        }
+
+        window.focusedItem = 1;
+        window.items = [];
+        const fs = require('fs');
+
+        function refreshItems(index) {
+            if (typeof index !== "number") window.focusedItem = 1;
+            window.items = window.parent.wm.getSwitcherItems();
+            if (window.items.length < 2) window.focusedItem = 0;
+
+            let width = (items.length * 144) + 16;
+
+            if (width > screen.width - 176) {
+                document.getElementById("switcher").style.display = "";
+                document.getElementById("switcher").innerHTML = items.map((item, i) => `
+                <div class="switcher-item" id="switcher-item-${item.id}" style="${i === window.focusedItem ? 'background-color: rgba(0, 0, 0, .05);' : ''} ${item['minimised'] ? 'opacity: .5;' : ''} border-radius: 7px; padding: 5px;">
+                    <img alt="" src="${fs.existsSync(i.application + "/icon-symbolic.svg") ? item.application + "/icon-symbolic.svg" : (fs.existsSync(item.application + "/icon.png") ? item.application + "/icon.png" : "./icons/window.svg")}" style="${i.minimised ? 'opacity: .5;' : ''}${fs.existsSync(item.application + "/icon-symbolic.svg") ? '' : 'border-radius: 999px;'} height: 24px; width: 24px; pointer-events: none; vertical-align: middle;">
+                    <span style="vertical-align: middle;">${item['title']}</span>
+                </div>
+                `).join("");
+
+                window.parent.document.getElementById("switcher-outer").style.width = "256px";
+                window.parent.document.getElementById("switcher-outer").style.left = "calc(50vw - 128px)";
+                window.parent.document.getElementById("switcher-outer").style.top = "calc(50vh - " + (((items.length * 34) + 10) / 2) + "px)";
+                window.parent.document.getElementById("switcher-outer").style.height = (items.length * 34) + 10 + "px";
+                document.getElementById("switcher").style.padding = "5px";
+            } else {
+                document.getElementById("switcher").style.display = "flex";
+                document.getElementById("switcher").innerHTML = items.map((item, i) => `
+                <div class="switcher-item" id="switcher-item-${item.id}" style="${i === window.focusedItem ? 'background-color: rgba(0, 0, 0, .05);' : ''} ${item['minimised'] ? 'opacity: .5;' : ''} border-radius: 7px; padding: 8px; display: grid; grid-template-rows: 96px 32px; width: 128px;">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <img alt="" src="${fs.existsSync(item.application + "/icon.png") ? item.application + "/icon.png" : "./icons/window.svg"}" style="${i.minimised ? 'opacity: .5;' : ''} height: 96px; width: 96px; pointer-events: none; vertical-align: middle; border-radius: 999px;">
+                    </div>
+                    <span style="max-width: 140px; white-space: nowrap; overflow: hidden !important; text-overflow: ellipsis; display: inline-block; text-align: center; opacity: .75; font-size: 16px; padding: 8px;">${item['title']}</span>
+                </div>
+                `).join("");
+            }
+
+            window.parent.document.getElementById("switcher-outer").style.width = width + "px";
+            window.parent.document.getElementById("switcher-outer").style.left = "calc(50vw - " + (width / 2) + "px)";
+            window.parent.document.getElementById("switcher-outer").style.top = "calc(50vh - 80px)";
+            window.parent.document.getElementById("switcher-outer").style.height = "160px";
+            document.getElementById("switcher").style.padding = "8px";
+        }
+    </script>
+
+    <div id="bg"></div>
+    <div id="switcher" style="padding: 8px; display: flex;"></div>
+</body>
+</html>

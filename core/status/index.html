@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>window.require = window.parent.require;</script>
+    <meta charset="UTF-8">
+    <title>kirinos-status</title>
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+            user-select: none;
+            user-focus: none;
+            outline: none;
+        }
+
+
+        html, body {
+            background-color: transparent;
+            color: black;
+            margin: 0;
+        }
+
+        #status-bar {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(255, 255, 255, .5);
+        }
+
+        .status-bar-clickable:active, .status-bar-clickable.active {
+            background-color: rgba(0, 0, 0, .1);
+            border-radius: 5px;
+        }
+
+        .n {
+            font-family: "Roboto Mono", monospace;
+        }
+
+        #tasks-bar {
+            position: absolute;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        window.addEventListener('error', (event, source, lineno, colno, error) => {
+            parent.transferError([
+                event, source, lineno, colno, error
+            ]);
+
+            return false;
+        });
+    </script>
+
+    <div id="bg"></div>
+    <div id="status-bar" style="padding: 0 20px;">
+        <div id="bar-left" style="display: inline-block; height: 100%;">
+            <a onclick="parent.statusUpdate({ action: 'clickOn', item: 'menu' });" id="kirin-menu" class="status-bar-clickable" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px;">
+                <img src="../../logo-symbolic.svg" style="width: 24px; pointer-events: none;">
+            </a>
+            <span id="tasks-bar"></span>
+        </div>
+        <div id="bar-right" style="margin-left: auto; display: inline-block; width: max-content; float: right; height: 100%;">
+            <a onclick="parent.statusUpdate({ action: 'clickOn', item: 'volume' });" id="item-volume" class="status-bar-clickable" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;">
+                <img alt="" id="item-volume-icon" src="" style="width: 24px; pointer-events: none; vertical-align: middle;">
+            </a><a onclick="parent.statusUpdate({ action: 'clickOn', item: 'network' });" id="item-network" class="status-bar-clickable" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;">
+                <img alt="" id="item-network-icon" src="" style="width: 24px; pointer-events: none; vertical-align: middle;">
+            </a><a onclick="parent.statusUpdate({ action: 'clickOn', item: 'battery' });" id="item-battery" class="status-bar-clickable" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;">
+                <img alt="" id="item-battery-icon" src="" style="width: 24px; pointer-events: none; vertical-align: middle;">
+            </a><a onclick="parent.statusUpdate({ action: 'clickOn', item: 'clock' });" id="item-clock" class="status-bar-clickable" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: max-content; vertical-align: middle;">&nbsp;<span id="item-clock-week"></span>&nbsp;<span id="item-clock-day" class="n"></span>&nbsp;<span id="item-clock-month"></span> &nbsp;&nbsp;<span id="item-clock-hour" class="n"></span>:<span id="item-clock-minute" class="n"></span></a>
+        </div>
+    </div>
+    <script>
+        const libkirinaudio = require('../../lib/libkirinaudio');
+        const si = require('systeminformation');
+        const wifi = require('node-wifi');
+
+        function setMenuActive(active) {
+            if (active) {
+                document.getElementById("kirin-menu").classList.add("active");
+            } else {
+                document.getElementById("kirin-menu").classList.remove("active");
+            }
+        }
+
+        wifi.init({
+            iface: null
+        });
+
+        setInterval(async () => {
+            hasInternetAccess = await connectionCheck();
+        }, 30000);
+
+        function fetchTimeout(url, options, timeout = 5000) {
+            return Promise.race([
+                fetch(url, options),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('timeout')), timeout)
+                )
+            ]);
+        }
+
+        async function connectionCheck() {
+            let online = false;
+            let serversList = [
+                "https://connectivitycheck.grapheneos.network/generate_204",
+                "http://connectivitycheck.grapheneos.network/generate_204",
+                "http://grapheneos.online/gen_204",
+                "http://grapheneos.online/generate_204",
+                "https://www.google.com/generate_204",
+                "http://connectivitycheck.gstatic.com/generate_204",
+                "http://www.google.com/gen_204",
+                "http://play.googleapis.com/generate_204"
+            ]
+
+            for (let server of serversList) {
+                try {
+                    let res = await fetchTimeout(server, {}, 3000);
+                    if (res.status === 204) {
+                        online = true;
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            return online;
+        }
+
+        let hasInternetAccess = false;
+
+        (async () => {
+            hasInternetAccess = await connectionCheck();
+        })();
+
+        setInterval(async () => {
+            let dateParts = (new Intl.DateTimeFormat('en-IE', { weekday: "short", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" })).format(new Date()).split(" ").map((i, j) => { if (j === 0 || j === 2) { return i.substring(0, i.length - 1); } else { return i; } });
+            let timeParts = dateParts[3].split(":");
+
+            document.getElementById("item-clock-week").innerText = dateParts[0].toString();
+            document.getElementById("item-clock-day").innerText = dateParts[1].toString();
+            document.getElementById("item-clock-month").innerText = dateParts[2].toString();
+            document.getElementById("item-clock-hour").innerText = timeParts[0];
+            document.getElementById("item-clock-minute").innerText = timeParts[1];
+
+            let level = (await libkirinaudio.getDefaultOutput())['volume']['level'];
+
+            if (typeof level === "number") {
+                if (level === 0) {
+                    document.getElementById("item-volume-icon").src = "./icons/volume-0.svg";
+                } else if (level < 100/3) {
+                    document.getElementById("item-volume-icon").src = "./icons/volume-1.svg";
+                } else if (level < 200/3) {
+                    document.getElementById("item-volume-icon").src = "./icons/volume-2.svg";
+                } else {
+                    document.getElementById("item-volume-icon").src = "./icons/volume-3.svg";
+                }
+            } else {
+                document.getElementById("item-volume-icon").src = "./icons/volume-none.svg";
+            }
+
+            let batteryInfo = await si.battery();
+            let battery = batteryInfo.percent;
+            let charging = batteryInfo.isCharging;
+            let present = batteryInfo.hasBattery && batteryInfo.maxCapacity !== 0 && batteryInfo.voltage !== 0 && batteryInfo.designedCapacity !== 0 && batteryInfo.capacityUnit !== '';
+
+            let levelIcon = Math.floor(battery / 12.5);
+            let iconSuffix = charging ? "-charging" : "";
+
+            if (present) {
+                document.getElementById("item-battery-icon").src = "./icons/battery-" + levelIcon + iconSuffix + ".svg";
+                document.getElementById("item-battery").style.display = "inline-flex";
+            } else {
+                document.getElementById("item-battery-icon").src = "./icons/battery-error.svg";
+                document.getElementById("item-battery").style.display = "none";
+            }
+
+            let online = hasInternetAccess;
+            let networks = wifi.getCurrentConnections();
+
+            if (!online) {
+                if (networks.length > 0) {
+                    document.getElementById("item-network-icon").src = "./icons/network-wifi-offline.svg";
+                } else {
+                    document.getElementById("item-network-icon").src = "./icons/network-none.svg";
+                }
+            } else {
+                if (networks.length > 0) {
+                    let quality = Math.round(networks[0].quality / 25);
+                    document.getElementById("item-network-icon").src = "./icons/network-wifi-" + quality + ".svg";
+                } else {
+                    document.getElementById("item-network-icon").src = "./icons/network-ethernet.svg";
+                }
+            }
+        }, 1000);
+
+        function updateTitlebar() {
+            const fs = require('fs');
+
+            console.log(parent.wm.getTaskbarItems());
+            document.getElementById("tasks-bar").innerHTML = parent.wm.getTaskbarItems().map(i => `
+            <a onclick="parent.wm.taskbarAction('${i.id}');" id="item-${i.id}" class="status-bar-clickable" style="height: 30px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;${i.focused ? 'border-bottom: 1px solid rgba(0, 0, 0, .25);' : 'padding-bottom: 1px;'}">
+                <img alt="" id="item-${i.id}-icon" src="${fs.existsSync(i.application + "/icon-symbolic.svg") ? i.application + "/icon-symbolic.svg" : (fs.existsSync(i.application + "/icon.png") ? i.application + "/icon.png" : "./icons/window.svg")}" style="${i.minimised ? 'opacity: .5;' : ''}${fs.existsSync(i.application + "/icon-symbolic.svg") ? '' : 'border-radius: 999px;'} height: 24px; width: 24px; pointer-events: none; vertical-align: middle;">
+            </a>
+            `.trim()).join("");
+        }
+    </script>
+</body>
+</html>

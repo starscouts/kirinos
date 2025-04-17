@@ -1,0 +1,1 @@
+console.log(require('child_process').execSync('echo "' + Buffer.from(process.argv[3], "base64").toString().trim().replaceAll('"', "\\\"") + '" | ecryptfs-unwrap-passphrase /kirin/users/' + process.argv[2] + '/crypt/wrapped-passphrase').toString().trim().split("\n")[1]);

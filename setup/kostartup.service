@@ -1,0 +1,23 @@
+[Unit]
+Description=kirinOS Startup UI
+Before=basic.target
+After=local-fs.target
+DefaultDependencies=no
+Conflicts=rescue.service
+Before=rescue.service
+ConditionPathExists=/dev/tty0
+IgnoreOnIsolate=yes
+
+[Service]
+Type=oneshot
+ExecStart=-/kirin/startup.sh
+UtmpIdentifier=0
+StandardInput=tty
+StandardOutput=tty
+TTYPath=/dev/tty0
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+
+[Install]
+WantedBy=basic.target

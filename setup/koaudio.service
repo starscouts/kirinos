@@ -1,0 +1,11 @@
+[Unit]
+Description=kirinOS Audio Subsystem
+DefaultDependencies=no
+Conflicts=rescue.service
+
+[Service]
+ExecStart=pulseaudio
+Restart=always
+
+[Install]
+WantedBy=basic.target

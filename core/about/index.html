@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mango-about</title>
+    <script>
+        const si = require('systeminformation');
+        const release = require('../../release.json');
+
+        function formatSize(size) {
+            if (size > 1024) {
+                if (size > 1024**2) {
+                    if (size > 1024**3) {
+                        if (size > 1024**4) {
+                            return Math.round(size / 1024**4) + " TB";
+                        } else {
+                            return Math.round(size / 1024**3) + " GB";
+                        }
+                    } else {
+                        return Math.round(size / 1024**2) + " MB";
+                    }
+                } else {
+                    return Math.round(size / 1024) + " KB";
+                }
+            } else {
+                return size + " bytes";
+            }
+        }
+    </script>
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+            user-select: none;
+            user-focus: none;
+            outline: none;
+            -webkit-user-drag: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, .25);
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, .35);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: rgba(0, 0, 0, .5);
+        }
+
+        code {
+            font-family: "Roboto Mono", monospace !important;
+        }
+    </style>
+</head>
+<body>
+    <div style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;">
+        <div>
+            <div>
+                <img alt="" src="../../logo.svg" style="width: 96px; display: block; margin-left: auto; margin-right: auto;">
+                <span style="font-size: 24px; font-weight: bold; margin-top: 20px; margin-bottom: 0; display: block; text-align: center;">kirinOS</span>
+                <span id="architecture" style="font-size: 12px; font-weight: normal; opacity: .3; margin-top: 0; margin-bottom: 20px; display: block; text-align: center;">-</span>
+            </div>
+            <table style="font-size: 12px;">
+                <tr>
+                    <td style="opacity: .75; text-align: right; padding-right: 10px;">CPU</td>
+                    <td style="opacity: .5;" id="about-cpu">-</td>
+                </tr>
+                <tr>
+                    <td style="opacity: .75; text-align: right; padding-right: 10px;">Memory</td>
+                    <td style="opacity: .5;" id="about-memory">-</td>
+                </tr>
+                <tr>
+                    <td style="opacity: .75; text-align: right; padding-right: 10px;">Storage</td>
+                    <td style="opacity: .5;" id="about-storage">-</td>
+                </tr>
+                <tr>
+                    <td style="opacity: .75; text-align: right; padding-right: 10px;">Graphics</td>
+                    <td style="opacity: .5;" id="about-gpu">-</td>
+                </tr>
+                <tr>
+                    <td style="opacity: .75; text-align: right; padding-right: 10px;">kirinOS</td>
+                    <td style="opacity: .5; line-height: 12px;" id="about-kirinos" onclick="changeVersion();">-</td>
+                </tr>
+            </table>
+        </div>
+
+        <script>
+            const child_process = require("child_process");
+
+            (async () => {
+                document.getElementById("about-kirinos").innerText = release['version'];
+
+                try {
+                    let cpu = await si.cpu();
+                    document.getElementById("about-cpu").innerText = cpu.brand.trim() !== "" ? cpu.brand : cpu.manufacturer;
+                } catch (e) {
+                    document.getElementById("about-cpu").innerText = "-";
+                }
+
+                try {
+                    document.getElementById("about-memory").innerText = formatSize((await si.mem()).total);
+                } catch (e) {
+                    document.getElementById("about-memory").innerText = "-";
+                }
+
+                try {
+                    let gpu = (await si.graphics())['controllers'][0];
+                    if (gpu.vramDynamic) {
+                        document.getElementById("about-gpu").innerText = (gpu['model'].length < 25 ? gpu['model'] : gpu['vendor']);
+                    } else {
+                        document.getElementById("about-gpu").innerText = (gpu['model'].length < 25 ? gpu['model'] : gpu['vendor']) + " " + formatSize(gpu.vram * 1024**2);
+                    }
+                } catch (e) {
+                    document.getElementById("about-gpu").innerText = "-";
+                }
+
+                try {
+                    let systemPartition = (await si.blockDevices()).filter(i => i.mount === "/")[0];
+                    let systemDisk = (await si.blockDevices()).filter(i => i.name === child_process.execSync("lsblk -no pkname " + systemPartition['device']).toString().trim().split("\n")[0].trim())[0];
+                    document.getElementById("about-storage").innerText = formatSize(systemDisk.size) + " " + systemDisk.model;
+                } catch (e) {
+                    document.getElementById("about-storage").innerText = "-";
+                }
+            })();
+
+            function changeVersion() {
+                document.getElementById("about-kirinos").innerHTML = release['shortVersion'] + " (<code>" + release['build'] + "</code>)";
+            }
+
+            if (process.arch === "arm64") {
+                document.getElementById("architecture").innerText = "ARM processor";
+            } else if (process.arch === "x64") {
+                document.getElementById("architecture").innerText = "x86 processor";
+            } else if (process.arch === "ia32") {
+                document.getElementById("architecture").innerText = "32bit x86 processor (unsupported)";
+            } else if (process.arch === "arm") {
+                document.getElementById("architecture").innerText = "32bit ARM processor (unsupported)";
+            } else if (process.arch === "mips") {
+                document.getElementById("architecture").innerText = "MIPS processor (unsupported)";
+            } else if (process.arch === "mipsel") {
+                document.getElementById("architecture").innerText = "MIPS LE processor (unsupported)";
+            } else if (process.arch === "ppc") {
+                document.getElementById("architecture").innerText = "32bit POWER processor (unsupported)";
+            } else if (process.arch === "ppc64") {
+                document.getElementById("architecture").innerText = "POWER processor (unsupported)";
+            } else if (process.arch === "s390") {
+                document.getElementById("architecture").innerText = "S/390 processor (unsupported)";
+            } else if (process.arch === "s390x") {
+                document.getElementById("architecture").innerText = "System Z processor (unsupported)";
+            }
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+[Unit]
+Description=kirinOS Display Manager (%I)
+After=systemd-user-sessions.service plymouth-quit-wait.service getty-pre.target
+After=rc-local.service
+Before=getty.target
+IgnoreOnIsolate=yes
+Conflicts=getty@%I.service
+Conflicts=rescue.service
+Before=rescue.service
+ConditionPathExists=/dev/tty0
+
+[Service]
+ExecStart=-/kirin/x11.sh
+Type=idle
+Restart=always
+RestartSec=0
+UtmpIdentifier=%I
+StandardInput=tty
+StandardOutput=tty
+TTYPath=/dev/%I
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+UnsetEnvironment=LANG LANGUAGE LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT LC_IDENTIFICATION
+
+[Install]
+WantedBy=getty.target
+DefaultInstance=tty1

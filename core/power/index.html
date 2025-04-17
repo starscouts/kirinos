@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>window.require = window.parent.require;</script>
+    <meta charset="UTF-8">
+    <title>kirinos-power</title>
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+            user-select: none;
+            user-focus: none;
+            outline: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, .25);
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, .35);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: rgba(0, 0, 0, .5);
+        }
+
+        html, body {
+            background-color: transparent;
+            color: black;
+            margin: 0;
+        }
+
+        #options {
+            background-color: rgba(255, 255, 255, .5);
+            position: fixed;
+            inset: 0;
+        }
+
+        #confirm {
+            background-color: rgba(255, 255, 255, .5);
+            position: fixed;
+            inset: 0;
+        }
+
+        .power-option:active img {
+            background-color: rgba(0, 0, 0, .1) !important;
+        }
+
+        .confirm-item:active, .confirm-item.active {
+            background-color: rgba(0, 0, 0, .1);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        window.addEventListener('error', (event, source, lineno, colno, error) => {
+            parent.transferError([
+                event, source, lineno, colno, error
+            ]);
+
+            return false;
+        });
+    </script>
+
+    <div id="options" style="display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 10px; padding: 8px 20px;">
+        <div onclick="askForConfirm('poweroff');" class="power-option" style="display: flex; width: 96px; align-items: center; justify-content: center;">
+            <div style="pointer-events: none;">
+                <div><img alt="" style="display: block; margin-left: auto; margin-right: auto; width: 24px; height: 24px; padding: 16px; border-radius: 999px; background-color: rgba(0, 0, 0, .05);" src="./icons/shutdown.svg"></div>
+                <div style="text-align: center; margin-top: 10px;">Power off</div>
+            </div>
+        </div>
+        <div onclick="askForConfirm('reboot');" class="power-option" style="display: flex; width: 96px; align-items: center; justify-content: center;">
+            <div style="pointer-events: none;">
+                <div><img alt="" style="display: block; margin-left: auto; margin-right: auto; width: 24px; height: 24px; padding: 16px; border-radius: 999px; background-color: rgba(0, 0, 0, .05);" src="./icons/restart.svg"></div>
+                <div style="text-align: center; margin-top: 10px;">Restart</div>
+            </div>
+        </div>
+        <div onclick="sendAction('sleep');" class="power-option" style="display: flex; width: 96px; align-items: center; justify-content: center;">
+            <div style="pointer-events: none;">
+                <div><img alt="" style="display: block; margin-left: auto; margin-right: auto; width: 24px; height: 24px; padding: 16px; border-radius: 999px; background-color: rgba(0, 0, 0, .05);" src="./icons/sleep.svg"></div>
+                <div style="text-align: center; margin-top: 10px;">Sleep</div>
+            </div>
+        </div>
+        <div onclick="askForConfirm('logout');" class="power-option" style="display: flex; width: 96px; align-items: center; justify-content: center;">
+            <div style="pointer-events: none;">
+                <div><img alt="" style="display: block; margin-left: auto; margin-right: auto; width: 24px; height: 24px; padding: 16px; border-radius: 999px; background-color: rgba(0, 0, 0, .05);" src="./icons/logout.svg"></div>
+                <div style="text-align: center; margin-top: 10px;">Log out</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm" style="display: none;">
+        <div id="confirm-restart" style="display: none; grid-template-columns: 96px 1fr 64px; padding: 8px 20px; height: 112px; width: 414px;">
+            <div style="display: flex; width: 96px; align-items: center; justify-content: center;">
+                <div style="pointer-events: none;">
+                    <div><img alt="" style="display: block; margin-left: auto; margin-right: auto; width: 24px; height: 24px; padding: 16px; border-radius: 999px; background-color: rgba(0, 0, 0, .05);" src="./icons/restart.svg"></div>
+                    <div style="text-align: center; margin-top: 10px;">Restart</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div style="margin-left: 10px; margin-right: 10px;">
+                    Are you sure you want to quit all applications and restart your computer now?
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div>
+                    <a class="confirm-item" onclick="sendAction('reboot');" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;"><img src="./icons/yes.svg" style="width: 24px; pointer-events: none; vertical-align: middle;"></a><a class="confirm-item" onclick="parent.closePowerOptions();" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;"><img src="./icons/no.svg" style="width: 24px; pointer-events: none; vertical-align: middle;"></a>
+                </div>
+            </div>
+        </div>
+
+        <div id="confirm-shutdown" style="display: none; grid-template-columns: 96px 1fr 64px; padding: 8px 20px; height: 112px; width: 414px;">
+            <div style="display: flex; width: 96px; align-items: center; justify-content: center;">
+                <div style="pointer-events: none;">
+                    <div><img alt="" style="display: block; margin-left: auto; margin-right: auto; width: 24px; height: 24px; padding: 16px; border-radius: 999px; background-color: rgba(0, 0, 0, .05);" src="./icons/shutdown.svg"></div>
+                    <div style="text-align: center; margin-top: 10px;">Power off</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div style="margin-left: 10px; margin-right: 10px;">
+                    Are you sure you want to quit all applications and power off your computer now?
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div>
+                    <a class="confirm-item" onclick="sendAction('poweroff');" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;"><img src="./icons/yes.svg" style="width: 24px; pointer-events: none; vertical-align: middle;"></a><a class="confirm-item" onclick="parent.closePowerOptions();" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;"><img src="./icons/no.svg" style="width: 24px; pointer-events: none; vertical-align: middle;"></a>
+                </div>
+            </div>
+        </div>
+
+        <div id="confirm-logout" style="display: none; grid-template-columns: 96px 1fr 64px; padding: 8px 20px; height: 112px; width: 414px;">
+            <div style="display: flex; width: 96px; align-items: center; justify-content: center;">
+                <div style="pointer-events: none;">
+                    <div><img alt="" style="display: block; margin-left: auto; margin-right: auto; width: 24px; height: 24px; padding: 16px; border-radius: 999px; background-color: rgba(0, 0, 0, .05);" src="./icons/logout.svg"></div>
+                    <div style="text-align: center; margin-top: 10px;">Log out</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div style="margin-left: 10px; margin-right: 10px;">
+                    Are you sure you want to quit all applications and log out now?
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div>
+                    <a class="confirm-item" onclick="sendAction('logout');" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;"><img src="./icons/yes.svg" style="width: 24px; pointer-events: none; vertical-align: middle;"></a><a class="confirm-item" onclick="parent.closePowerOptions();" style="height: 31px; display: inline-flex; align-items: center; justify-content: center; width: 31px; vertical-align: middle;"><img src="./icons/no.svg" style="width: 24px; pointer-events: none; vertical-align: middle;"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function askForConfirm(type) {
+            document.getElementById("options").style.display = "none";
+            document.getElementById("confirm").style.display = "";
+
+            document.getElementById("confirm-logout").style.display = "none";
+            document.getElementById("confirm-shutdown").style.display = "none";
+            document.getElementById("confirm-restart").style.display = "none";
+
+            if (type === "poweroff") {
+                document.getElementById("confirm-shutdown").style.display = "grid";
+            }
+
+            if (type === "reboot") {
+                document.getElementById("confirm-restart").style.display = "grid";
+            }
+
+            if (type === "logout") {
+                document.getElementById("confirm-logout").style.display = "grid";
+            }
+        }
+
+        function sendAction(action) {
+            if (action === "logout") parent.logout();
+            if (action === "reboot") parent.reboot();
+            if (action === "poweroff") parent.poweroff();
+            if (action === "sleep") parent.sleep();
+        }
+    </script>
+</body>
+</html>

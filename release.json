@@ -1,0 +1,12 @@
+{
+  "name": "kirinOS Developer Preview",
+  "shortName": "kirinOS DP",
+  "version": "Developer Preview",
+  "shortVersion": "DP",
+  "experimental": {
+    "os": true,
+    "platform": true,
+    "apps": true
+  },
+  "build": "Dev"
+}

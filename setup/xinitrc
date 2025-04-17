@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /kirin
+xsetroot -solid "#90a14a" -bg "#90a14a"
+./init.sh

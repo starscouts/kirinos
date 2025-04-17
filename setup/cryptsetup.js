@@ -1,0 +1,1 @@
+console.log(require('child_process').execSync("( stty -echo; printf \"Passphrase: \" 1>&2; PASSWORD=\"password\"; stty echo; echo \"$PASSWORD\"; ) | ecryptfs-insert-wrapped-passphrase-into-keyring /kirin/users/0/crypt/wrapped-passphrase -").toString().trim().split("[")[1].split("]")[0]);
